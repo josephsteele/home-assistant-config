@@ -1,4 +1,5 @@
-**Home Assistant Config**  
+#**Home Assistant Config**
+
 **Front End**
 ![alt text](https://github.com/josephsteele/home-assistant-config/blob/master/Front%20End%20Snapshot.PNG)
 
