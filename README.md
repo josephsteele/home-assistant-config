@@ -10,7 +10,7 @@
 * Tesla - battery charge, plugged in state, climate, locked/unlocked, etc.  
 * Waze travel time - gives the time for commute to work based on current traffic  
 * Person and device tracker - who is at home  
-* Coinmarketcap - current bitcion price  
+* Coinmarketcap - current bitcoin price  
 * Timezone - time in other country of interest  
 
 **Automations**
@@ -21,5 +21,4 @@
 * Notification if bad traffic on commute via waze    
 * Notification if Tesla in not plugged in by 21:30 and the battery charge is below 60%  
 
-**Lovelace Front End**
 
