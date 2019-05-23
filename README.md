@@ -1,5 +1,7 @@
 **Home Assistant Config**  
 
+![alt text](https://github.com/josephsteele/home-assistant/blob/master/Front%20End%20Snapshot.PNG)
+
 **Components**  
 * Konnected - 5 IR sensors, door sensor, siren  
 * Alarm Panel - Day and nighttime alarm settings  
