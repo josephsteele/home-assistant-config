@@ -1,0 +1,37 @@
+Joe: device_tracker.galaxys8_1, device_tracker.galaxy_s8_3
+Mire: device_tracker.galaxys8_2 
+
+default_view:
+      view: yes
+      entities:
+        - group.alarmsystem
+        - climate.heating
+        - group.information
+        - group.athome
+        - weather.weather
+
+information:
+    name: Information
+    entities:
+      - sensor.drive_time_to_la_oficina
+      - sensor.time_in_lima
+      - sensor.bitcoin
+
+alarmsystem:
+    name: Alarm System
+    entities:
+      - alarm_control_panel.ha_alarm
+      - binary_sensor.front_entrance
+      - binary_sensor.corridor
+      - binary_sensor.landing
+      - binary_sensor.dining_room
+      - binary_sensor.utility_room
+      - binary_sensor.garage
+      - switch.siren
+      
+athome:
+     name: At Home
+     entities:
+      - group.joe
+      - group.mire
+

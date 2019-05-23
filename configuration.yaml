@@ -1,0 +1,231 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: !secret name
+  # Location required to calculate the time the sun rises and sets
+  latitude: !secret latitude
+  longitude: !secret longitude
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 17
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: Europe/London
+  # Customization file
+  customize: !include customize.yaml
+
+# Show links to resources in log and frontend
+#introduction:
+
+# Enables the frontend
+frontend:
+
+#panel_iframe:
+#  configurator:
+#    title: Configurator
+#    icon: mdi:wrench
+#    url: http://hassio.local:3218
+    
+# Enables configuration UI
+config:
+
+http:
+#  api_password: !secret http_password
+  # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+  # base_url: example.duckdns.org:8123
+
+# Checks for available updates
+# Note: This component will send some information about your system to
+# the developers to assist with development of Home Assistant.
+# For more information, please see:
+# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
+updater:
+  # Optional, allows Home Assistant developers to focus on popular components.
+  # include_used_components: true
+
+# Discover some devices automatically
+discovery:
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+# Enables support for tracking state changes over time
+history:
+
+# View all events in a logbook
+logbook:
+
+# Enables a map showing the location of tracked devices
+map:
+
+# Track the sun
+sun:
+
+# MQTT
+#mqtt:
+#  password: !secret mqtt
+
+# Weather prediction
+sensor:
+  - platform: yr
+  - platform: worldclock
+    time_zone: America/Lima
+    name: Lima    
+#  - platform: metoffice
+#    api_key: !secret metoffice_api_key
+#    monitored_conditions:
+#      - weather
+#      - temperature
+#      - wind_speed
+#      - precipitation
+  - platform: waze_travel_time
+    origin: !secret waze_origin
+    destination: !secret waze_destination
+    region: 'EU'
+    name: Oficina
+  - platform: coinmarketcap
+    display_currency_decimals: 1
+
+# Text to speech
+tts:
+  - platform: google_translate
+    service_name: google_say
+
+# Cloud
+cloud:
+
+group: !include groups.yaml
+automation: !include automations.yaml
+
+hive:
+  username: !secret hive_username
+  password: !secret hive_password
+  
+person:
+  - name: Joe
+    id: joe1
+    user_id: joe1
+    device_trackers:
+      - device_tracker.galaxys8_1
+  - name: Mire
+    id: mire1
+    device_trackers:
+      - device_tracker.galaxys8_2
+
+tesla:
+  username: !secret tesla_username
+  password: !secret tesla_password
+  scan_interval: 1800
+    
+konnected:
+  access_token: !secret konnected_access_token
+  devices:
+    - id: !secret konnected_id
+      binary_sensors:
+        - zone: 1
+          type: door
+          name: 'Entrance'
+        - zone: 2
+          type: motion
+          name: 'Corridor'
+        - zone: 3
+          type: motion
+          name: 'Dining'
+        - zone: 4
+          type: motion
+          name: 'Utility'
+        - zone: 5
+          type: motion
+          name: 'Landing'
+        - zone: 6
+          type: motion
+          name: 'Garage'
+      switches:
+        - zone: out
+          name: 'siren'
+
+alarm_control_panel:
+  - platform: manual
+    code: !secret alarm_code
+    pending_time: 30
+    delay_time: 20
+    trigger_time: 4
+    disarmed:
+      trigger_time: 0
+#    armed_night:
+#      pending_time: 30
+#      delay_time: 30
+    armed_home:
+      pending_time: 0
+      delay_time: 0
+
+device_tracker:
+  - platform: sky_hub
+    host: 192.168.0.1
+#    username: !secret sky_hub_username
+#    password: !secret sky_hub_password
+    new_device_defaults:
+      track_new_devices: True
+      hide_if_away: False
+  - platform: bluetooth_tracker
+    new_device_defaults:
+      track_new_devices: True
+      hide_if_away: False
+    
+telegram_bot:
+  - platform: polling
+    api_key: !secret telegram_api_key
+    allowed_chat_ids:
+      - !secret telegram_chatid
+
+notify:
+  - platform: telegram
+    name: telegram
+    chat_id: !secret telegram_chatid
+  - platform: lannouncer
+    name: lannouncer
+    host: 192.168.0.18
+
+weather:
+  - platform: darksky
+    api_key: !secret darksky_api_key
+    units: uk
+    name: Weather
+    mode: daily
+
+emulated_hue:
+  expose_by_default: false
+  entities:
+    switch.siren:
+      name: "Alarm Siren"
+      hidden: false
+    script.disarm_alarm:
+      name: "Disarm Alarm"
+      hidden: false
+    script.arm_night_alarm:
+      name: "Night Alarm"
+      hidden: false
+    script.arm_alarm:
+      name: "Away Alarm"
+      hidden: false
+
+script:
+  disarm_alarm:
+    sequence:
+      - service: alarm_control_panel.alarm_disarm
+        data:
+          entity_id: alarm_control_panel.ha_alarm
+          code: !secret alarm_code
+  arm_night_alarm:
+    sequence:
+      - delay: '00:01:00'
+      - service: alarm_control_panel.alarm_arm_home
+        data:
+          entity_id: alarm_control_panel.ha_alarm
+          code: !secret alarm_code
+  arm_alarm:
+    sequence:
+      - delay: '00:01:00'
+      - service: alarm_control_panel.alarm_arm_away
+        data:
+          entity_id: alarm_control_panel.ha_alarm
+          code: !secret alarm_code

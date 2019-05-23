@@ -1,0 +1,310 @@
+#########Auto Silent Alarm when away from home and alarm disarmed
+- alias: Automatic Silent Alarm
+  trigger:
+   - platform: state
+     entity_id: binary_sensor.entrance, binary_sensor.corridor, binary_sensor.landing, binary_sensor.dining, binary_sensor.utility, binary_sensor.garage
+     to: 'on'
+  condition:
+    -  condition: state
+       entity_id: alarm_control_panel.ha_alarm
+       state: disarmed
+    -  condition: state
+       entity_id: group.all_devices
+       state: not_home
+  action:
+    - service: notify.telegram
+      data:
+        message: 'Silent alarm tripped {{ trigger.to_state }} {{now().strftime("%Y%m%d-%H%M%S")}}'
+        data:
+          keyboard:
+            - '/Arm, /Disarm'
+
+############Trip Armed Alarm
+- alias: Trip_alarm_while_armed_away
+  trigger:
+   - platform: state
+     entity_id: binary_sensor.entrance, binary_sensor.corridor, binary_sensor.landing, binary_sensor.dining, binary_sensor.utility, binary_sensor.garage
+     to: 'on'
+  condition:
+      condition: state
+      entity_id: alarm_control_panel.ha_alarm
+      state: armed_away
+  action:
+    - service: alarm_control_panel.alarm_trigger
+      entity_id: alarm_control_panel.ha_alarm
+    - service: notify.telegram
+      data:
+        message: 'ALARM TRIGGERED!!! {{now().strftime("%Y%m%d-%H%M%S")}}'
+        data:
+          keyboard:
+            - '/Arm, /Disarm'
+    - service: notify.lannouncer
+      data:
+        message: 'Alarm tripped!'
+
+- alias: Trip_alarm_while_armed_home
+  trigger:
+   - platform: state
+     entity_id: binary_sensor.entrance, binary_sensor.corridor, binary_sensor.dining, binary_sensor.garage
+     to: 'on'
+  condition:
+      condition: state
+      entity_id: alarm_control_panel.ha_alarm
+      state: armed_home
+  action:
+    - service: alarm_control_panel.alarm_trigger
+      entity_id: alarm_control_panel.ha_alarm
+    - service: notify.telegram
+      data:
+        message: 'Alarm tripped!'
+        data:
+          keyboard:
+            - '/Arm, /Disarm'
+    - service: notify.lannouncer
+      data:
+        message: 'Alarm tripped!'
+
+#############Armed alarm triggered
+- alias: Sound siren and notify when alarm triggered
+  trigger:
+    - platform: state
+      entity_id: alarm_control_panel.ha_alarm
+      to: 'triggered'
+  action:
+    - service: switch.turn_on
+      entity_id: switch.siren_2
+    - service: notify.telegram
+      data:
+        message: 'Alarm Activated!!!'
+        data:
+          keyboard:
+            - '/Arm, /Disarm'
+    - service: notify.lannouncer
+      data:
+        message: 'Alarm Activated!!!'
+
+######Alarm armed notifications
+- alias: Send notification when alarm armed at home
+  trigger:
+    - platform: state
+      entity_id: alarm_control_panel.ha_alarm
+      to: 'armed_home'
+  action:
+    - service: notify.telegram
+      data:
+        message: 'Alarm armed'
+        data:
+          keyboard:
+            - '/Arm, /Disarm'
+
+- alias: Send notification when alarm armed away
+  trigger:
+    - platform: state
+      entity_id: alarm_control_panel.ha_alarm
+      to: 'armed_away'
+  action:
+    - service: notify.telegram
+      data:
+        message: 'Alarm armed'
+        data:
+          keyboard:
+            - '/Arm, /Disarm'
+    - service: notify.lannouncer
+      data:
+        message: 'Alarm armed'
+
+######Alarm disarmed actions
+- alias: Turn off siren and send notification when alarm is disarmed
+  trigger:
+    - platform: state
+      entity_id: alarm_control_panel.ha_alarm
+      to: 'disarmed'
+  action:
+    - service: switch.turn_off
+      entity_id: switch.siren_2
+    - service: notify.telegram
+      data:
+        message: 'Alarm deactivated'
+        data:
+          keyboard:
+            - '/Arm, /Disarm'
+#    - service: notify.lannouncer
+#      data:
+#        message: 'Alarm deactivated'
+
+###########Notify on boot
+- alias: Telegram bot to notify on boot
+  trigger:
+    - event: start
+      platform: homeassistant
+  condition: []
+  action:
+      service: notify.telegram
+      data:
+        message: 'Home Assistant booted'
+
+###########Panic Button 
+- alias: Send notification when siren turned on
+  trigger:
+    - platform: state
+      entity_id: switch.siren_2
+      to: 'on'
+  action:
+    - service: notify.telegram
+      data:
+         message: 'Panic button activated!'
+    - service: notify.lannouncer
+      data:
+         message: 'Panic button activated!'
+
+#############Auto night alarm
+- alias: Arm alarm at night
+  trigger:
+   - platform: time
+     at: '23:30:00'
+  condition:
+   - condition: state
+     entity_id: group.athome
+     state: home
+  action:
+    - service: alarm_control_panel.alarm_arm_home
+      data:
+        entity_id: alarm_control_panel.ha_alarm
+        code: !secret alarm_code
+
+- alias: Disarm alarm_home after 5am
+  trigger:
+   - platform: state
+     entity_id: binary_sensor.landing
+     to: 'on'
+  condition:
+   - condition: state
+     entity_id: alarm_control_panel.ha_alarm 
+     state: armed_home
+   - condition: time
+     before: '09:00:00'
+     after: '05:00:00'
+  action:
+    - service: alarm_control_panel.alarm_disarm
+      data:
+        entity_id: alarm_control_panel.ha_alarm
+        code: !secret alarm_code
+
+##### Automations when arriving and leaving house
+- alias: Turn hive to schedule mode when arriving home
+  trigger:
+    - platform: state
+      entity_id: group.athome
+      to: 'home'
+  action:
+    - service: climate.set_operation_mode
+      data:
+        entity_id: climate.heating
+        operation_mode: 'auto'
+    - service: notify.telegram
+      data:
+        message: 'Welcome home, hive Heating set to schedule mode'
+        data:
+          keyboard:            
+            - '/Arm, /Disarm'
+
+- alias: Disarm alarm when arriving home
+  trigger:
+    - platform: state
+      entity_id: group.athome
+      to: 'home'
+  condition:
+      condition: state
+      entity_id: alarm_control_panel.ha_alarm 
+      state: armed_away
+  action:
+    - service: alarm_control_panel.alarm_disarm
+      data:
+        entity_id: alarm_control_panel.ha_alarm
+        code: !secret alarm_code
+
+- alias: Turn hive off and give option to arm alarm when leaving
+  trigger:
+    - platform: state
+      entity_id: group.athome
+      to: 'not_home'
+  action:
+    - service: climate.set_operation_mode
+      data:
+        entity_id: climate.heating
+        operation_mode: 'off'
+    - service: notify.telegram
+      data:
+        message: 'Looks like you have gone out. Hive Heating turned off. Would you like to arm the alarm?'
+        data:
+          keyboard:
+            - '/Arm, /Disarm'
+
+##########Telegram Commands
+- alias: Telegram Arm command
+  hide_entity: true
+  trigger:
+    - platform: event
+      event_type: telegram_command
+      event_data:
+        command: '/Arm'
+  action:
+    - service: alarm_control_panel.alarm_arm_away
+      data:
+        entity_id: alarm_control_panel.ha_alarm
+        code: !secret alarm_code
+    - service: notify.telegram
+      data:
+        message: 'Alarm Arming'
+        data:
+          keyboard:
+            - '/Arm, /Disarm'
+
+- alias: Telegram Disarm command
+  hide_entity: true
+  trigger:
+    - platform: event
+      event_type: telegram_command
+      event_data:
+        command: '/Disarm'
+  action:
+    - service: alarm_control_panel.alarm_disarm
+      data:
+        entity_id: alarm_control_panel.ha_alarm
+        code: !secret alarm_code
+
+############Bad traffic notification
+- alias: Bad Traffic Notification
+  trigger:
+   - platform: numeric_state
+     entity_id: sensor.oficina
+     above: 27
+  condition:
+   - condition: state
+     entity_id: group.athome
+     state: home
+   - condition: time
+     before: '09:30:00'
+     after: '07:30:00'
+  action:
+    - service: notify.telegram
+      data:
+         message: 'Bad Traffic Warning, over 30 minutes to reach the office'
+         
+- alias: Alert if Tesla not plugged in and battery below 60
+  trigger:
+   - platform: time
+     at: '21:30:00'
+  condition:
+   - condition: numeric_state
+     entity_id: sensor.tesla_model_s_5yjsb7e29hf181280_battery_sensor
+     below: 60
+   - condition: state
+     entity_id: binary_sensor.tesla_model_s_5yjsb7e29hf181280_charger_sensor
+     state: 'off'
+  action:
+    - service: notify.telegram
+      data:
+         message: 'Tesla not plugged in, battery below 60%'
+
+

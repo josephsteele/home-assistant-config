@@ -1,0 +1,50 @@
+title: La Casa de Joe y Mire
+views:
+  - title: default_view
+    background: radial-gradient(crimson, skyblue)
+#    panel: true
+    cards:
+      - type: vertical-stack
+        cards:
+        - type: alarm-panel
+          entity: alarm_control_panel.ha_alarm
+          states: 
+            - arm_home
+            - arm_away
+        - type: glance
+          entities:
+            - binary_sensor.entrance
+            - binary_sensor.corridor
+            - binary_sensor.landing
+            - binary_sensor.dining
+            - binary_sensor.utility
+            - binary_sensor.garage
+          columns: 6
+      - type: vertical-stack
+        cards:
+        - type: weather-forecast
+          entity: weather.weather
+        - type: glance
+          entities:
+            - sensor.lima
+            - sensor.bitcoin
+            - sensor.oficina
+            - group.joe
+            - group.mire
+          columns: 5
+      - type: vertical-stack
+        cards:
+        - type: thermostat
+          entity: climate.heating
+          title: Hive
+          hvac:
+            states:
+              'Off': 'off'
+              'Auto': 'auto'
+              'Heating': 'heat'
+#      - type: entities
+#        entities:
+#          - climate.heating
+        - type: entity-button
+          entity: switch.siren
+          name: Alarm Panic Button
