@@ -1,5 +1,4 @@
-# home-assistant
-**Home Assistant**  
+**Home Assistant Config**  
 
 **Components**  
 * Konnected - 5 IR sensors, door sensor, siren  
@@ -19,4 +18,6 @@
 * Heating on and off using presence detection  
 * Notification if bad traffic on commute via waze    
 * Notification if Tesla in not plugged in by 21:30 and the battery charge is below 60%  
+
+**Lovelace Front End**
 
