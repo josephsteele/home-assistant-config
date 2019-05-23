@@ -1,16 +1,22 @@
 # home-assistant
-Home Automation setup: 
--Hive thermostat
--Konnected alarm panel
--Weather
--At home card
--Information card
+**Home Assistant**  
 
-Automations:
--Arming and disarming of house alarm at night
--Disarming house alarm when arriving home#
--Siren and notification if alarm tripped
--Heating on and off using presence detection
--Notification if bad traffic on commute via waze
--
+**Components**  
+* Konnected - 5 IR sensors, door sensor, siren  
+* Alarm Panel - Day and nighttime alarm settings  
+* Hive thermostat - heating control  
+* Darksky Weather  
+* Tesla - battery charge, plugged in state, climate, locked/unlocked, etc.  
+* Waze travel time - gives the time for commute to work based on current traffic  
+* Person and device tracker - who is at home  
+* Coinmarketcap - current bitcion price  
+* Timezone - time in other country of interest  
+
+**Automations**
+* Automatic Arming and disarming of house alarm at night  
+* Automatic Disarming of house alarm when arriving home  
+* Siren and notification if alarm tripped  
+* Heating on and off using presence detection  
+* Notification if bad traffic on commute via waze    
+* Notification if Tesla in not plugged in by 21:30 and the battery charge is below 60%  
 
